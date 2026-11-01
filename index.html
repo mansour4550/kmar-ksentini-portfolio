@@ -126,6 +126,25 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .tags{display:flex;flex-wrap:wrap;gap:6px}
 .tags li{font-size:11.5px;padding:3px 10px;border:1px solid var(--rule);border-radius:999px;color:var(--ink);background:var(--paper)}
 
+/* ---------- Showcase (pinned, robot presents cards) ---------- */
+.showcase{position:relative;height:340vh}
+.sc-pin{position:sticky;top:0;height:100vh;display:flex;align-items:center;overflow:hidden}
+.sc-pin .wrap{width:100%}
+.sc-text{max-width:430px;display:grid;gap:18px}
+.sc-text .sec-head{margin-bottom:0}
+.sc-count{font-family:var(--f-serif);font-size:20px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sc-count b{font-weight:400;font-size:44px;color:var(--cobalt);margin-right:4px}
+.sc-item{display:none;gap:12px}
+.sc-item.on{display:grid}
+.sc-item h3{font-family:var(--f-display);font-weight:400;font-size:clamp(40px,5vw,60px);line-height:.95;color:var(--cobalt);text-transform:uppercase}
+.sc-item p{font-size:16px;color:var(--muted);max-width:38ch}
+.sc-dots{display:flex;gap:8px}
+.sc-dots span{width:28px;height:3px;border-radius:2px;background:var(--rule);transition:background .3s,width .3s}
+.sc-dots span.on{background:var(--cobalt);width:44px}
+.sc-hint{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.sc-item.on{animation:scIn .5s cubic-bezier(.2,.7,.2,1) both}@keyframes scIn{from{opacity:.001;transform:translateY(14px)}to{opacity:1;transform:none}}}
+@media (max-width:759px){.sc-pin{align-items:flex-start;padding-top:84px}.sc-item h3{font-size:40px}.sc-item p{font-size:15px}}
+
 /* ---------- Case studies ---------- */
 .cases{display:grid;gap:88px}
 .case{display:grid;gap:32px;align-items:center}
@@ -370,6 +389,46 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       </div>
     </div>
     <div class="ground"></div>
+  </section>
+
+  <!-- Showcase: the robot presents one card per field while the section is pinned -->
+  <section class="showcase" id="showcase">
+    <div class="sc-pin">
+      <div class="wrap">
+        <div class="sc-text">
+          <div class="sec-head"><h2><span lang="fr">Ce que je construis</span><span lang="en">What I build</span></h2><span class="line"></span></div>
+          <p class="sc-count" aria-hidden="true"><b id="sc-n">01</b>/ 04</p>
+          <div class="sc-items" aria-live="polite">
+            <article class="sc-item on">
+              <h3><span lang="fr">IA Générative</span><span lang="en">Generative AI</span></h3>
+              <p lang="fr">Des assistants qui comprennent le langage naturel et répondent à partir de vos propres données, comme un chatbot WhatsApp qui interroge SQL Server.</p>
+              <p lang="en">Assistants that understand natural language and answer from your own data, like a WhatsApp chatbot that queries SQL Server.</p>
+              <ul class="tags"><li>LLM</li><li>Gemini API</li><li>Node.js</li><li>Prompting</li></ul>
+            </article>
+            <article class="sc-item">
+              <h3>Data &amp; BI</h3>
+              <p lang="fr">De la donnée brute aux décisions : pipelines ETL, entrepôts de données, cubes OLAP, tableaux de bord et modèles de Machine Learning.</p>
+              <p lang="en">From raw data to decisions: ETL pipelines, data warehouses, OLAP cubes, dashboards and machine learning models.</p>
+              <ul class="tags"><li>SSIS</li><li>SSAS</li><li>Power BI</li><li>Scikit-learn</li></ul>
+            </article>
+            <article class="sc-item">
+              <h3>DevOps &amp; Cloud</h3>
+              <p lang="fr">Des infrastructures fiables et automatisées : clusters haute disponibilité, CI/CD, supervision et accès sécurisés.</p>
+              <p lang="en">Reliable, automated infrastructure: high-availability clusters, CI/CD, monitoring and secure access.</p>
+              <ul class="tags"><li>Docker Swarm</li><li>GitHub Actions</li><li>Reverse Proxy</li><li>IAM</li></ul>
+            </article>
+            <article class="sc-item">
+              <h3>Full-stack</h3>
+              <p lang="fr">Des applications web complètes, de l'API au front-end : authentification, tableaux de bord et interfaces responsives.</p>
+              <p lang="en">Complete web applications, from API to front end: authentication, dashboards and responsive interfaces.</p>
+              <ul class="tags"><li>Angular</li><li>Spring Boot</li><li>.NET</li><li>Laravel</li></ul>
+            </article>
+          </div>
+          <div class="sc-dots" aria-hidden="true"><span class="on"></span><span></span><span></span><span></span></div>
+          <p class="sc-hint"><span lang="fr">Faites défiler pour voir les cartes ↓</span><span lang="en">Scroll to see the cards ↓</span></p>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- Case studies -->
@@ -764,6 +823,7 @@ monitor  <span class="ok">1/1</span>
     document.getElementById("photo").alt = T[l].alt;
     drawWheel(T[l].wheel);
     try { localStorage.setItem("kk-lang", l); } catch(e){}
+    document.dispatchEvent(new Event("kk-lang"));
   }
   document.querySelectorAll(".lang button").forEach(function(b){ b.addEventListener("click", function(){ setLang(b.dataset.lang); }); });
 
@@ -983,6 +1043,85 @@ monitor  <span class="ok">1/1</span>
     scene.add(bb); bubbles.push(bb);
   }
 
+  // presentation cards the robot pulls out and holds up
+  var CARD_TEXT = [
+    {fr:["IA Générative","LLM · Gemini · Chatbots"], en:["Generative AI","LLM · Gemini · Chatbots"]},
+    {fr:["Data & BI","ETL · OLAP · Power BI"], en:["Data & BI","ETL · OLAP · Power BI"]},
+    {fr:["DevOps & Cloud","Docker Swarm · CI/CD"], en:["DevOps & Cloud","Docker Swarm · CI/CD"]},
+    {fr:["Full-stack","Angular · Spring Boot · .NET"], en:["Full-stack","Angular · Spring Boot · .NET"]}
+  ];
+  function rr(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
+  function drawCard(c){
+    var g = c.cv.getContext("2d"), W = c.cv.width, H = c.cv.height, t = CARD_TEXT[c.i][root.lang === "en" ? "en" : "fr"];
+    g.clearRect(0,0,W,H);
+    g.save(); rr(g, 4, 4, W-8, H-8, 46); g.clip();
+    var gr = g.createLinearGradient(0, 0, W, H); gr.addColorStop(0, "#0B1F6B"); gr.addColorStop(.55, "#1538A6"); gr.addColorStop(1, "#2E63E0");
+    g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    g.strokeStyle = "rgba(255,255,255,.055)"; g.lineWidth = 2;
+    for (var x = -H; x < W; x += 14){ g.beginPath(); g.moveTo(x, H); g.lineTo(x + H, 0); g.stroke(); }
+    var gl = g.createRadialGradient(W*.82, H*.15, 10, W*.82, H*.15, W*.6); gl.addColorStop(0, "rgba(140,175,255,.45)"); gl.addColorStop(1, "rgba(140,175,255,0)");
+    g.fillStyle = gl; g.fillRect(0, 0, W, H);
+    g.restore();
+    rr(g, 5, 5, W-10, H-10, 45); g.strokeStyle = "rgba(244,236,223,.25)"; g.lineWidth = 3; g.stroke();
+    g.fillStyle = "#F4ECDF"; g.textBaseline = "alphabetic";
+    g.font = "40px 'DM Serif Display', Georgia, serif"; g.fillText("KK", 44, 82);
+    g.font = "500 24px Jost, 'Segoe UI', sans-serif"; g.textAlign = "right"; g.fillStyle = "rgba(244,236,223,.75)";
+    g.fillText("0" + (c.i+1) + " / 04", W - 44, 76); g.textAlign = "left";
+    var fs = 92; g.fillStyle = "#F4ECDF";
+    do { g.font = fs + "px Anton, Impact, 'Arial Narrow', sans-serif"; fs -= 4; } while (g.measureText(t[0].toUpperCase()).width > W - 88 && fs > 40);
+    g.fillText(t[0].toUpperCase(), 44, H - 112);
+    g.fillStyle = "#DCC7A8"; g.font = "500 28px Jost, 'Segoe UI', sans-serif"; g.fillText(t[1], 46, H - 58);
+    c.tex.needsUpdate = true;
+  }
+  var cardGeo = new THREE.PlaneGeometry(2.2, 1.375), cards = [];
+  for (var ci = 0; ci < 4; ci++){
+    var cv = document.createElement("canvas"); cv.width = 640; cv.height = 400;
+    var tex = new THREE.CanvasTexture(cv); tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 4;
+    var cm = new THREE.Mesh(cardGeo, new THREE.MeshBasicMaterial({map:tex, transparent:true, side:THREE.DoubleSide, toneMapped:false}));
+    cm.userData = {cv:cv, tex:tex, i:ci};
+    cm.position.set(1, -.35, .6); cm.scale.setScalar(.001); cm.rotation.y = Math.PI; cm.visible = false;
+    robot.add(cm); cards.push(cm); drawCard(cm.userData);
+  }
+  function redrawCards(){ cards.forEach(function(c){ drawCard(c.userData); }); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(redrawCards);
+  document.addEventListener("kk-lang", redrawCards);
+
+  var HAND = {p:[1.0,-.35,.6], r:0, s:.001};
+  var SLOTS = [
+    {p:[ 1.95, 1.55, 1.0], r:-.17, s:1.00},
+    {p:[-1.95,  .35,  .9], r: .32, s: .62},
+    {p:[ 1.75, -.45, 1.1], r: .28, s: .55},
+    {p:[-1.55, -.85, 1.2], r:-.22, s: .50}
+  ];
+  var showEl = document.getElementById("showcase"), scItems = showEl.querySelectorAll(".sc-item"), scDots = showEl.querySelectorAll(".sc-dots span"), scN = document.getElementById("sc-n"), shownIdx = 0;
+  function updateCards(dt, time, tg){
+    var range = Math.max(1, showEl.offsetHeight - innerHeight);
+    var p = clamp((scrollY - showEl.offsetTop) / range, 0, 1);
+    var a = p * 4.3, active = Math.min(3, Math.floor(a));
+    if (active !== shownIdx){
+      shownIdx = active;
+      scItems.forEach(function(el, n){ el.classList.toggle("on", n === active); });
+      scDots.forEach(function(el, n){ el.classList.toggle("on", n <= active); });
+      scN.textContent = "0" + (active + 1);
+    }
+    var inShow = tg.show > .6 && unfold > .9, kk = reduce ? 1 : 1 - Math.pow(.0006, dt), out = 0;
+    cards.forEach(function(c, i){
+      var slot = HAND;
+      if (inShow && a >= i) slot = SLOTS[i === active ? 0 : active - i];
+      if (slot !== HAND) out = 1;
+      var bob = slot === HAND || reduce ? 0 : Math.sin(time*1.3 + i*1.7) * .07;
+      c.position.x += (slot.p[0] - c.position.x) * kk;
+      c.position.y += (slot.p[1] + bob - c.position.y) * kk;
+      c.position.z += (slot.p[2] - c.position.z) * kk;
+      c.rotation.z += (slot.r - c.rotation.z) * kk;
+      c.rotation.y += ((slot === HAND ? Math.PI : -robot.rotation.y + mouse.x*.35) - c.rotation.y) * kk;
+      c.rotation.x += ((slot === HAND ? 0 : mouse.y*.2) - c.rotation.x) * kk;
+      var sc = c.scale.x + (slot.s - c.scale.x) * kk; c.scale.setScalar(sc);
+      c.visible = sc > .03;
+    });
+    return out;
+  }
+
   scene.add(new THREE.HemisphereLight(0xFFF6E8, 0xC9AE88, .75));
   var key = new THREE.DirectionalLight(0xFFFFFF, 1.6); key.position.set(4, 6, 7); scene.add(key);
   var fill = new THREE.DirectionalLight(0xFFE8CC, .5); fill.position.set(-6, 1, 4); scene.add(fill);
@@ -991,6 +1130,8 @@ monitor  <span class="ok">1/1</span>
   // where the robot stands for each section (x,y as fraction of half-viewport; s = scale)
   var STOPS = [
     {id:"top",        x: .02, y:-.40, s:.50},
+    {id:"showcase", at:"start", x: .30, y:-.20, s:.62, show:1, nx:0, ny:-.50, ns:.38},
+    {id:"showcase", at:"end",   x: .30, y:-.20, s:.62, show:1, nx:0, ny:-.50, ns:.38},
     {id:"work",       x: .87, y:-.20, s:.50},
     {id:"more",       x:-.86, y:-.25, s:.50},
     {id:"experience", x: .86, y:-.10, s:.52},
@@ -1010,17 +1151,26 @@ monitor  <span class="ok">1/1</span>
   }
   addEventListener("resize", resize); resize();
 
+  function eff(st){
+    if (!narrow) return st;
+    return {x: st.nx != null ? st.nx : (st.x === 0 ? 0 : Math.sign(st.x) * Math.max(Math.abs(st.x), .7)),
+            y: st.ny != null ? st.ny : st.y, s: st.ns != null ? st.ns : st.s * .6};
+  }
   function target(){
     var maxMid = document.documentElement.scrollHeight - innerHeight/2, mid = scrollY + innerHeight/2;
-    var centers = els.map(function(e, n){ return Math.min(e.offsetTop + e.offsetHeight/2, maxMid - (els.length-1-n)); });
+    var centers = STOPS.map(function(st, n){
+      var e = els[n];
+      var c = st.at === "start" ? e.offsetTop + innerHeight/2 : st.at === "end" ? e.offsetTop + e.offsetHeight - innerHeight/2 : e.offsetTop + e.offsetHeight/2;
+      return Math.min(c, maxMid - (STOPS.length-1-n));
+    });
     var i = 0; while (i < centers.length-1 && mid > centers[i+1]) i++;
-    var a = STOPS[i], b = STOPS[Math.min(i+1, STOPS.length-1)];
-    var span = centers[Math.min(i+1, centers.length-1)] - centers[i];
+    var j = Math.min(i+1, STOPS.length-1), A = STOPS[i], B = STOPS[j], a = eff(A), b = eff(B);
+    var span = centers[j] - centers[i];
     var t = span > 0 ? clamp((mid - centers[i]) / span, 0, 1) : 0;
     t = easeInOut(t);
-    var x = a.x + (b.x-a.x)*t, y = a.y + (b.y-a.y)*t, s = a.s + (b.s-a.s)*t;
-    if (narrow){ x = x === 0 ? 0 : Math.sign(x) * Math.max(Math.abs(x), .7); s *= .6; }
-    return {x:x*halfW, y:y*halfH, s:s, last: i === STOPS.length-2 ? t : (i === STOPS.length-1 ? 1 : 0)};
+    return {x:(a.x + (b.x-a.x)*t)*halfW, y:(a.y + (b.y-a.y)*t)*halfH, s:a.s + (b.s-a.s)*t,
+            show:(A.show ? 1-t : 0) + (B.show ? t : 0),
+            wave:(A.id === "contact" ? 1-t : 0) + (B.id === "contact" ? t : 0)};
   }
 
   var mouse = {x:0, y:0};
@@ -1062,13 +1212,16 @@ monitor  <span class="ok">1/1</span>
     vel += (dy - vel) * .12;
 
     // face toward the content, point at it, wave at the end
-    var side = Math.abs(rig.position.x) < .3 ? 0 : Math.sign(rig.position.x);
+    var cardsOut = updateCards(dt, time, tg);
+    var side = Math.abs(rig.position.x) < .3 || tg.show > .5 ? 0 : Math.sign(rig.position.x);
     var face = -side * .4;
     robot.rotation.y += (face + mouse.x*.25 - robot.rotation.y) * k;
-    canvas.style.zIndex = tg.last > .6 ? 3 : 0;
-    var wave = tg.last, point = unfold > .9 ? (1 - wave) : 0;
+    canvas.style.zIndex = tg.wave > .6 ? 3 : 0;
+    var wave = tg.wave, show = tg.show, point = unfold > .9 ? (1 - wave) * (1 - show) : 0;
     var raiseR = side > 0 ? 1.25*point : .15, raiseL = side < 0 ? 1.25*point : .15;
     raiseR = raiseR*(1-wave) + (2.6 + Math.sin(time*7)*.35)*wave;
+    raiseL = raiseL*(1-show*cardsOut) + (2.0 + Math.sin(time*1.3)*.08)*show*cardsOut;
+    raiseR = raiseR*(1-show*cardsOut) + .9*show*cardsOut;
     armR.rotation.z += (-raiseR*armsOut - armR.rotation.z) * k;
     armL.rotation.z += ((raiseL + Math.sin(time*1.4)*.05)*armsOut - armL.rotation.z) * k;
     armR.rotation.x = armL.rotation.x = reduce ? 0 : Math.sin(time*1.4)*.08;
@@ -1077,7 +1230,7 @@ monitor  <span class="ok">1/1</span>
       robot.position.y = -.55 + Math.sin(time*1.6)*.08;
       robot.rotation.z = clamp(-vel*.004, -.25, .25);
       robot.rotation.x = clamp(vel*.003, -.2, .2);
-      headPivot.rotation.y += (mouse.x*.8 - headPivot.rotation.y) * .08;
+      headPivot.rotation.y += (mouse.x*.8*(1-show*.6) + .4*show*cardsOut - headPivot.rotation.y) * .08;
       headPivot.rotation.x += (mouse.y*.35 - headPivot.rotation.x) * .08;
       antenna.rotation.z = Math.sin(time*3)*.12 - vel*.01;
       M.glow.opacity = .35 + Math.min(Math.abs(vel)*.03, .5) + Math.sin(time*4)*.08;
